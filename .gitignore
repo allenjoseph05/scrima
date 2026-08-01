@@ -1,0 +1,83 @@
+# Dependencies
+node_modules/
+.pnpm-store/
+
+# Build output and caches
+dist/
+build/
+.next/
+out/
+.turbo/
+coverage/
+*.tsbuildinfo
+packages/server/dist/
+packages/shared/dist/
+packages/client/dist/
+packages/web/.next/
+packages/web/out/
+
+# Environment files and secrets
+.env
+.env.*
+!.env.example
+!.env.*.example
+packages/**/.env
+packages/**/.env.*
+!packages/**/.env.example
+!packages/**/.env.*.example
+
+# Logs
+*.log
+dev.log
+npm-debug.log*
+pnpm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# OS and editor files
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+
+# Local assistant/tooling state
+.claude/
+LOCAL_*.md
+*.local.md
+
+# Tauri/Rust generated files
+packages/client/src-tauri/target/
+packages/client/src-tauri/gen/
+packages/client/src-tauri/.tauri/
+
+# ML datasets, extracted frames, review artifacts, and training scratch data
+packages/server/data/
+ml-training/
+
+# Model weights should be handled deliberately through Git LFS, releases, or storage.
+# Keep class label text files trackable, but do not accidentally commit binary weights.
+packages/server/src/services/coaching/models/*.onnx
+
+# Local test videos and generated verification outputs
+*.mp4
+*.mov
+*.part
+*.zip
+/scrima-*.png
+packages/server/test-video*
+packages/server/test-*.mjs
+packages/server/test-*.ts
+packages/server/hsv-verify-output/
+packages/server/crop-reading-output/
+packages/server/*-output/
+docs/baseline-report-*.json
+
+# Documentation: keep only the public project README in version control.
+*.md
+!/README.md
+docs/
+
+# Python cache
+__pycache__/
+*.py[cod]
+.pytest_cache/
