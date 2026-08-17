@@ -1,0 +1,83 @@
+{
+  "version": "7",
+  "dialect": "postgresql",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "7",
+      "when": 1774068372676,
+      "tag": "0000_freezing_whirlwind",
+      "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1774074905349,
+      "tag": "0001_classy_the_professor",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1774922400000,
+      "tag": "0002_column_rename_analysis_status",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1743544800000,
+      "tag": "0003_knowledge_pipeline",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1743897600000,
+      "tag": "0004_player_observations",
+      "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1743984000000,
+      "tag": "0005_coaching_brain",
+      "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1776585600000,
+      "tag": "0006_coaching_resolution_fields",
+      "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1777291200000,
+      "tag": "0007_chat_quota_usage",
+      "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1777680000000,
+      "tag": "0008_backfill_resolved_agent_map",
+      "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1777681200000,
+      "tag": "0009_observations_temporal",
+      "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1777737600000,
+      "tag": "0010_observations_agent_tag",
+      "breakpoints": true
+    }
+  ]
+}
