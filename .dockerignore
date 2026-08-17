@@ -1,0 +1,17 @@
+node_modules
+.git
+*.md
+.env
+.env.*
+packages/client
+packages/web
+packages/server/node_modules
+packages/shared/node_modules
+packages/server/dist
+packages/shared/dist
+packages/server/.env
+packages/server/.env.*
+**/*.test.ts
+**/*.spec.ts
+**/vitest.config.ts
+docker-compose.yml
