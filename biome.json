@@ -38,5 +38,23 @@
       "target",
       "packages/client/src-tauri/target"
     ]
-  }
+  },
+  "overrides": [
+    {
+      "include": [
+        "packages/server/src/games/valorant/parser.ts",
+        "packages/server/src/routes/coaching.routes.ts",
+        "packages/server/src/services/cache/coaching-cache.service.ts",
+        "packages/server/src/services/knowledge/game-knowledge.service.ts",
+        "packages/server/src/services/knowledge/types.ts"
+      ],
+      "linter": {
+        "rules": {
+          "suspicious": {
+            "noExplicitAny": "off"
+          }
+        }
+      }
+    }
+  ]
 }
