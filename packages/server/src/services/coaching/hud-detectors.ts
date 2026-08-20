@@ -183,7 +183,7 @@ export function checkAbilityStatus(
  *
  * @returns true if average brightness > 200 (nearly white screen)
  */
-export function detectFlash(frameBuffer: Buffer, width: number, height: number): boolean {
+export function detectFlash(frameBuffer: Buffer, _width: number, _height: number): boolean {
   // Sample every 10th pixel for speed
   let totalBrightness = 0;
   let count = 0;
