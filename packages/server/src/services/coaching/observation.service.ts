@@ -9,7 +9,7 @@
  * Gracefully degrades if pgvector extension is not available.
  */
 
-import { eq, and, desc, sql, asc } from 'drizzle-orm';
+import { and, asc, desc, eq, sql } from 'drizzle-orm';
 import type { Db } from '../../db/index.js';
 import { playerObservations } from '../../db/schema.js';
 import { embedTexts } from './embedding.util.js';
