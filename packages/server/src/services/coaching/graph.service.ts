@@ -10,10 +10,10 @@
  * Gracefully degrades if pgvector extension is unavailable (embeddings optional).
  */
 
-import { eq, and, desc, sql, asc, isNull } from 'drizzle-orm';
+import { and, desc, eq, isNull, sql } from 'drizzle-orm';
 import type { Db } from '../../db/index.js';
-import { coachingGraphNodes, coachingGraphEdges } from '../../db/schema.js';
-import { getSkillsForCategory, getAgentRole } from '../../games/valorant/skill-taxonomy.js';
+import { coachingGraphEdges, coachingGraphNodes } from '../../db/schema.js';
+import { getAgentRole, getSkillsForCategory } from '../../games/valorant/skill-taxonomy.js';
 import { embedTexts, isValid768 } from './embedding.util.js';
 
 // ── Constants ────────────────────────────────────────────────────────────────
