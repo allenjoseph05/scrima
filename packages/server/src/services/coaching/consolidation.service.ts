@@ -13,16 +13,15 @@
  *   - TraceMem: narrative threads from raw observations
  */
 
-import { eq, and, desc, sql, lt, gt } from 'drizzle-orm';
+import { and, desc, eq, gt, lt, sql } from 'drizzle-orm';
+import { env } from '../../config/env.js';
 import type { Db } from '../../db/index.js';
 import {
-  coachingGraphNodes,
   coachingGraphEdges,
+  coachingGraphNodes,
   coachingReports,
   playerSkillMastery,
-  playerObservations,
 } from '../../db/schema.js';
-import { env } from '../../config/env.js';
 
 // ── Constants ────────────────────────────────────────────────────────────────
 
@@ -237,7 +236,7 @@ export class ConsolidationService {
 
       // Raw VLM dump (planned in canonical v3)
       if ('vlmRaw' in next && next.vlmRaw !== null) {
-        delete next.vlmRaw;
+        next.vlmRaw = undefined;
         changed = true;
       }
 
