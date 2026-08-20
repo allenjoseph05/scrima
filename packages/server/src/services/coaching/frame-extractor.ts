@@ -12,10 +12,10 @@
  * pre-death ability bars, and buy phase screenshots.
  */
 
+import { execFile } from 'node:child_process';
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
-import { execFile } from 'node:child_process';
 import { promisify } from 'node:util';
 
 const execFileAsync = promisify(execFile);
@@ -99,7 +99,7 @@ const PREDEATH_CROPS = [
 export function parseTimestamp(approxTime: string): number | null {
   if (!approxTime || approxTime === 'unknown') return null;
   const parts = approxTime.split(':').map(Number);
-  if (parts.some(isNaN)) return null;
+  if (parts.some(Number.isNaN)) return null;
   if (parts.length === 2) return parts[0] * 60 + parts[1];
   if (parts.length === 3) return parts[0] * 3600 + parts[1] * 60 + parts[2];
   return null;
