@@ -15,7 +15,7 @@
  * See: docs/YOUR_COACH_LIVING_MIND.md §7.2
  */
 
-import { eq, and, desc, gte } from 'drizzle-orm';
+import { and, desc, eq, gte } from 'drizzle-orm';
 import type { Db } from '../../db/index.js';
 import { coachingGraphNodes, matches } from '../../db/schema.js';
 
