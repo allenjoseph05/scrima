@@ -10,31 +10,31 @@
  * No video storage, no ffmpeg, no ONNX classification on server.
  */
 
-import { v4 as uuidv4 } from 'uuid';
-import { eq } from 'drizzle-orm';
 import { GoogleGenAI, MediaResolution } from '@google/genai';
+import { AppError } from '@scrima/shared';
+import { eq } from 'drizzle-orm';
+import { v4 as uuidv4 } from 'uuid';
+import { env } from '../../config/env.js';
 import { db } from '../../db/index.js';
 import { coachingReports, matches } from '../../db/schema.js';
-import { env } from '../../config/env.js';
-import { logger } from '../../shared/logger.js';
-import { AppError } from '@scrima/shared';
-import { BrainContextService } from './brain-context.service.js';
 import {
+  type AbilityCategory,
+  getAgentAbilityProfile,
+} from '../../games/valorant/ability-categories.js';
+import {
+  AGENTS,
+  MAP_CALLOUTS,
   VALID_AGENTS,
   VALID_MAPS,
   VALID_WEAPONS,
-  AGENTS,
-  MAP_CALLOUTS,
 } from '../../games/valorant/knowledge.js';
+import { logger } from '../../shared/logger.js';
 import {
+  type SnapshotResult,
   detectSnapshotPatterns,
   formatSnapshotFindings,
-  type SnapshotResult,
 } from './ability-snapshot-patterns.js';
-import {
-  getAgentAbilityProfile,
-  type AbilityCategory,
-} from '../../games/valorant/ability-categories.js';
+import { BrainContextService } from './brain-context.service.js';
 
 // ── Agent abilities — derived from knowledge.ts AGENTS so EVERY agent is
 // covered (Miks, Clove, Waylay, Veto, Tejo, Vyse, KAY/O, etc.). Previously
@@ -682,7 +682,8 @@ function coerceEnumOrNull(raw: unknown, allowed: string[]): string | null {
 }
 
 function coerceInt(raw: unknown, min: number, max: number): number | null {
-  const n = typeof raw === 'number' ? raw : typeof raw === 'string' ? parseInt(raw, 10) : NaN;
+  const n =
+    typeof raw === 'number' ? raw : typeof raw === 'string' ? Number.parseInt(raw, 10) : Number.NaN;
   if (!Number.isFinite(n)) return null;
   const i = Math.round(n);
   if (i < min || i > max) return null;
@@ -1666,15 +1667,15 @@ const DEATH_JSON_KEYS = [
 function findBalancedJson(text: string, from: number): string | null {
   let depth = 0;
   let inString = false;
-  let escape = false;
+  let isEscaped = false;
   for (let i = from; i < text.length; i++) {
     const ch = text[i];
-    if (escape) {
-      escape = false;
+    if (isEscaped) {
+      isEscaped = false;
       continue;
     }
     if (inString) {
-      if (ch === '\\') escape = true;
+      if (ch === '\\') isEscaped = true;
       else if (ch === '"') inString = false;
       continue;
     }
@@ -1697,7 +1698,7 @@ export function extractDeathJson(raw: string): Record<string, unknown> | null {
   // Strip markdown fences (```json ... ``` or ``` ... ```)
   let text = raw;
   const fence = text.match(/```(?:json)?\s*([\s\S]*?)```/i);
-  if (fence && fence[1]) text = fence[1];
+  if (fence?.[1]) text = fence[1];
 
   // Walk every `{` in the text; try to parse the balanced block from there.
   // Accept the first one whose parsed object includes a known key.
@@ -2279,7 +2280,7 @@ export class FrameAnalysisService {
     // Normalize: Gemini sometimes uses "deaths" instead of "deathCoaching"
     if (!reportObj.deathCoaching && Array.isArray(reportObj.deaths)) {
       reportObj.deathCoaching = reportObj.deaths;
-      delete reportObj.deaths;
+      reportObj.deaths = undefined;
     }
 
     const totalFailed = input.deaths.length - deathAnalyses.length;
@@ -2447,7 +2448,7 @@ export class FrameAnalysisService {
           inlineData: { mimeType: 'image/jpeg', data: death.abilityBarCropBase64 },
         });
         parts.push({
-          text: `[ABILITY-BAR CROP at the refined decision anchor — the four icons are C / Q / E / X in left-to-right order; this is the authoritative source for abilityStatus]`,
+          text: '[ABILITY-BAR CROP at the refined decision anchor — the four icons are C / Q / E / X in left-to-right order; this is the authoritative source for abilityStatus]',
         });
       }
 
@@ -2560,7 +2561,7 @@ Local timing evidence:
 ${localEvidenceLines}
 
 Frames provided (player-POV, pre-death through death):
-${useFightPacket ? v4FrameLabels : frameLabels}${death.abilityBarCropBase64 ? `\n  • ABILITY-BAR CROP (zoomed C/Q/E/X from the decision-time frame)` : ''}${typedCropLines ? `\n${typedCropLines}` : ''}
+${useFightPacket ? v4FrameLabels : frameLabels}${death.abilityBarCropBase64 ? '\n  • ABILITY-BAR CROP (zoomed C/Q/E/X from the decision-time frame)' : ''}${typedCropLines ? `\n${typedCropLines}` : ''}
 
 ${
   useFightPacket
@@ -2818,7 +2819,7 @@ REMEMBER: null and "unclear" are correct answers when a value is not legible. A 
       const hpLine =
         d.decisionHP != null
           ? `  decision_hp: ${d.decisionHP}${shieldPart}${d.impactHP != null ? ` → impact_hp: ${d.impactHP}` : ''}`
-          : `  decision_hp: unclear`;
+          : '  decision_hp: unclear';
       lines.push(hpLine);
 
       // Ability state — explicit per-slot state so model knows what was READY
@@ -3221,7 +3222,7 @@ IMPORTANT: emit one deathCoaching entry PER death in the facts above (${deaths.l
       let text = raw;
       // Strip markdown fences
       const fence = text.match(/```(?:json)?\s*([\s\S]*?)```/i);
-      if (fence && fence[1]) text = fence[1];
+      if (fence?.[1]) text = fence[1];
 
       // Helper: ensure the value is usable (object, not array/null/primitive).
       // Unwrap a single-element array around an object.
@@ -3337,7 +3338,7 @@ IMPORTANT: emit one deathCoaching entry PER death in the facts above (${deaths.l
       for (const e of synthEntries) {
         if (e && typeof e.death_number === 'number') synthByNumber.set(e.death_number, e);
       }
-      delete report.deaths;
+      report.deaths = undefined;
 
       const gradeForCategory = (cat: string | undefined, avoidable: boolean): string => {
         // Simple heuristic — only used when synthesis didn't emit a grade
@@ -3654,7 +3655,7 @@ IMPORTANT: emit one deathCoaching entry PER death in the facts above (${deaths.l
       if (d.decisionHP != null) sitParts.push(`at ${d.decisionHP} HP`);
       const situation =
         sitParts.length > 0
-          ? sitParts.join(' ').replace(/^([a-z])/, (c) => c.toUpperCase()) + '.'
+          ? `${sitParts.join(' ').replace(/^([a-z])/, (c) => c.toUpperCase())}.`
           : 'Engagement details could not be fully extracted from the frames.';
 
       // Mistake + category: inferred from enum facts
@@ -3693,10 +3694,12 @@ IMPORTANT: emit one deathCoaching entry PER death in the facts above (${deaths.l
         mistake = `Crosshair was ${d.crosshairPlacement.replace('_', ' ')} when the engagement started — lost the first-shot window before aiming up.`;
         category = 'crosshair';
       } else if (d.peekType === 'dry_swing') {
-        mistake = `Wide-swung the angle with no utility and no info — turned the duel into a pure aim battle.`;
+        mistake =
+          'Wide-swung the angle with no utility and no info — turned the duel into a pure aim battle.';
         category = 'peeking';
       } else if (d.cover === 'exposed' && d.hadPreInfo === false) {
-        mistake = `Pushed into an open sightline without pre-info — got caught before being able to react.`;
+        mistake =
+          'Pushed into an open sightline without pre-info — got caught before being able to react.';
         category = 'positioning';
       } else if (d.decisionHP != null && d.decisionHP < 50) {
         mistake = `Engaged at low HP (${d.decisionHP}) — a single successful shot from the enemy ended the fight.`;
@@ -3763,11 +3766,7 @@ IMPORTANT: emit one deathCoaching entry PER death in the facts above (${deaths.l
     const mistakes = factCoaching.map((fc) => fc.mistake).filter((m) => m.length > 0);
     const improvements = factCoaching.map((fc) => fc.correction).filter((c) => c.length > 0);
 
-    const matchVerdict =
-      `Analyzed ${deaths.length} ${deaths.length === 1 ? 'death' : 'deaths'}` +
-      `${lockedAgent ? ` on ${lockedAgent}` : ''}. ` +
-      `Match-level pattern synthesis was unavailable this run — the per-death ` +
-      `breakdown below is fully grounded in the frames from each death.`;
+    const matchVerdict = `Analyzed ${deaths.length} ${deaths.length === 1 ? 'death' : 'deaths'}${lockedAgent ? ` on ${lockedAgent}` : ''}. Match-level pattern synthesis was unavailable this run — the per-death breakdown below is fully grounded in the frames from each death.`;
 
     // Priority issue — use pattern when 2+ deaths share a category, else top death
     let priorityIssue: Record<string, unknown> | null = null;
@@ -3805,7 +3804,7 @@ IMPORTANT: emit one deathCoaching entry PER death in the facts above (${deaths.l
         category: deaths[0]?.category || 'unclear',
         severity: 'minor',
         rounds_affected: 1,
-        title: mistakes[0].length > 80 ? mistakes[0].slice(0, 77) + '...' : mistakes[0],
+        title: mistakes[0].length > 80 ? `${mistakes[0].slice(0, 77)}...` : mistakes[0],
         what_happened: mistakes[0],
         root_cause:
           'Match-level synthesis was unavailable. See the per-death breakdown for full context.',
@@ -3817,7 +3816,7 @@ IMPORTANT: emit one deathCoaching entry PER death in the facts above (${deaths.l
       category: deaths[i + 1]?.category || 'unclear',
       severity: 'minor' as const,
       rounds_affected: 1,
-      title: m.length > 80 ? m.slice(0, 77) + '...' : m,
+      title: m.length > 80 ? `${m.slice(0, 77)}...` : m,
       what_happened: m,
       root_cause: '',
       what_to_do: improvements[i + 1] || '',
@@ -3867,9 +3866,7 @@ IMPORTANT: emit one deathCoaching entry PER death in the facts above (${deaths.l
     };
 
     const coachingContinuity = {
-      progress_note:
-        `Analyzed ${deaths.length} of ${context.deaths.length} ${context.deaths.length === 1 ? 'death' : 'deaths'}. ` +
-        `AI match-summary was unavailable — per-death coaching below is still fully grounded in frames.`,
+      progress_note: `Analyzed ${deaths.length} of ${context.deaths.length} ${context.deaths.length === 1 ? 'death' : 'deaths'}. AI match-summary was unavailable — per-death coaching below is still fully grounded in frames.`,
     };
 
     const gradeForCat = (cat: string | undefined, avoidable: boolean): string => {
@@ -4086,13 +4083,13 @@ Respond with ONLY this JSON, nothing else:
     // Pattern 1: "Please retry in 21.773420952s."
     const m1 = msg.match(/retry in ([\d.]+)s/i);
     if (m1) {
-      const secs = parseFloat(m1[1]);
+      const secs = Number.parseFloat(m1[1]);
       if (Number.isFinite(secs) && secs > 0) return Math.ceil(secs * 1000);
     }
     // Pattern 2: structured RetryInfo in error body — "retryDelay":"21s"
     const m2 = msg.match(/"retryDelay":"(\d+)s"/);
     if (m2) {
-      const secs = parseInt(m2[1], 10);
+      const secs = Number.parseInt(m2[1], 10);
       if (Number.isFinite(secs) && secs > 0) return secs * 1000;
     }
     return null;
@@ -4118,7 +4115,7 @@ Respond with ONLY this JSON, nothing else:
         // backoff capped at 30s (503). Add 10% jitter to avoid thundering-herd
         // behavior when multiple workers are waiting on the same quota.
         const googleDelay = is429 ? this.parseRetryDelayMs(err) : null;
-        const expDelay = Math.min(2000 * Math.pow(2, attempt), 30000);
+        const expDelay = Math.min(2000 * 2 ** attempt, 30000);
         const baseDelay = googleDelay ?? expDelay;
         const jittered = baseDelay + Math.random() * baseDelay * 0.1;
 
