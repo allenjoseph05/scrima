@@ -15,34 +15,33 @@
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
-import { eq, and, desc } from 'drizzle-orm';
+import type { GameContext } from '@scrima/shared';
+import { and, desc, eq } from 'drizzle-orm';
 import { v4 as uuidv4 } from 'uuid';
-import type { Db } from '../../db/index.js';
-import { coachingReports, coachingJobs, matches } from '../../db/schema.js';
-import { GeminiProvider, type GeminiModelId } from '../vlm/gemini.provider.js';
-import { TempStorageService } from '../storage/temp-storage.service.js';
-import { UsageService } from '../billing/usage.service.js';
-import { CoachingCreditsService } from './coaching-credits.service.js';
-import { VlmError } from '../../shared/errors.js';
 import { env } from '../../config/env.js';
-import { detectGameTimeline, type GameTimeline } from './hsv-detector.js';
-import { classifyGameTimeline, type VlmGameTimeline } from './vlm-frame-classifier.js';
-import { extractDeathContexts, type DeathContext } from './death-context-extractor.js';
-import { compileDeathClips, cleanupClips, type DeathClipInfo } from './clip-compiler.js';
-import { buildAbilityTimeline, type AbilityTimeline } from './ability-timeline.service.js';
-import { detectAntiPatterns, formatFindings, type Finding } from './ability-anti-patterns.js';
+import type { Db } from '../../db/index.js';
+import { coachingJobs, coachingReports, matches } from '../../db/schema.js';
+import { normalizeLocation } from '../../games/valorant/map-zones.js';
+import { VlmError } from '../../shared/errors.js';
+import type { UsageService } from '../billing/usage.service.js';
+import type { TempStorageService } from '../storage/temp-storage.service.js';
+import { type GeminiModelId, GeminiProvider } from '../vlm/gemini.provider.js';
+import { type Finding, detectAntiPatterns, formatFindings } from './ability-anti-patterns.js';
 import {
+  type PositiveFinding,
   detectPositivePatterns,
   formatPositiveFindings,
-  type PositiveFinding,
 } from './ability-positive-patterns.js';
-import { normalizeLocation, hasMapDictionary } from '../../games/valorant/map-zones.js';
-import type { GameContext } from '@scrima/shared';
+import { type AbilityTimeline, buildAbilityTimeline } from './ability-timeline.service.js';
+import type { CoachingCreditsService } from './coaching-credits.service.js';
+import { type DeathContext, extractDeathContexts } from './death-context-extractor.js';
 import type {
+  CoachingHistory,
   DeepAnalyzeInput,
   DeepAnalyzeResult,
-  CoachingHistory,
 } from './deep-analysis.service.js';
+import type { GameTimeline } from './hsv-detector.js';
+import { type VlmGameTimeline, classifyGameTimeline } from './vlm-frame-classifier.js';
 
 // ── Text-only coaching prompt ────────────────────────────────────────────────
 
@@ -114,31 +113,23 @@ function buildTextCoachingPrompt(
   const clientDeaths = context.deathDetails ?? [];
   let clientDeathBlock = '';
   if (clientDeaths.length > 0) {
-    clientDeathBlock =
-      `\n═══ CLIENT-DETECTED DETAILS (from live game monitoring) ═══\n` +
-      clientDeaths
-        .map(
-          (d) =>
-            `  Death ${d.index + 1} at ${d.timestampFormatted}: killed by ${d.killer} with ${d.weapon}` +
-            (d.headshot ? ' (headshot)' : '') +
-            ` | Team ${d.teamAlive}v${d.enemyAlive}` +
-            ` | Economy: $${d.money}` +
-            (d.abilitiesAvailable.length > 0
+    clientDeathBlock = `\n═══ CLIENT-DETECTED DETAILS (from live game monitoring) ═══\n${clientDeaths
+      .map(
+        (d) =>
+          `  Death ${d.index + 1} at ${d.timestampFormatted}: killed by ${d.killer} with ${d.weapon}${d.headshot ? ' (headshot)' : ''} | Team ${d.teamAlive}v${d.enemyAlive} | Economy: $${d.money}${
+            d.abilitiesAvailable.length > 0
               ? ` | Abilities available: ${d.abilitiesAvailable.join(', ')}`
-              : ''),
-        )
-        .join('\n') +
-      '\n';
+              : ''
+          }`,
+      )
+      .join('\n')}\n`;
   }
 
   // Economy timeline
   const ecoTimeline = context.economyTimeline ?? [];
   let ecoBlock = '';
   if (ecoTimeline.length > 0) {
-    ecoBlock =
-      `\n═══ ECONOMY TIMELINE ═══\n` +
-      ecoTimeline.map((e) => `  Round ${e.round}: $${e.money} (${e.buyType})`).join('\n') +
-      '\n';
+    ecoBlock = `\n═══ ECONOMY TIMELINE ═══\n${ecoTimeline.map((e) => `  Round ${e.round}: $${e.money} (${e.buyType})`).join('\n')}\n`;
   }
 
   // Coaching history
@@ -149,9 +140,7 @@ function buildTextCoachingPrompt(
       historyBlock += ` Last challenge: "${coachingHistory.lastChallenge.title}" (${coachingHistory.lastChallenge.category}).`;
     }
     if (coachingHistory.patterns.length > 0) {
-      historyBlock +=
-        '\nRecurring patterns: ' +
-        coachingHistory.patterns.map((p) => `${p.category} (${p.trend})`).join(', ');
+      historyBlock += `\nRecurring patterns: ${coachingHistory.patterns.map((p) => `${p.category} (${p.trend})`).join(', ')}`;
     }
     historyBlock += '\n';
   }
@@ -343,7 +332,7 @@ export class CvAnalysisService {
   async analyzeGame(input: DeepAnalyzeInput): Promise<DeepAnalyzeResult | null> {
     const start = Date.now();
     const gameMode = input.context.gameMode ?? 'competitive';
-    const gameId = input.context.game ?? 'valorant';
+    const _gameId = input.context.game ?? 'valorant';
 
     console.log(
       '[CV-Analysis] START — agent=%s, map=%s, mode=%s, match=%s',
@@ -556,10 +545,7 @@ export class CvAnalysisService {
           historyBlock += ` Last focus: "${coachingHistory.lastChallenge.title}" (${coachingHistory.lastChallenge.category}).`;
         }
         if (coachingHistory.patterns.length > 0) {
-          historyBlock +=
-            '\nRecurring issues: ' +
-            coachingHistory.patterns.map((p) => `${p.category} (${p.trend})`).join(', ') +
-            '.';
+          historyBlock += `\nRecurring issues: ${coachingHistory.patterns.map((p) => `${p.category} (${p.trend})`).join(', ')}.`;
         }
         if (coachingHistory.lastDrill) {
           historyBlock += `\nLast drill: ${coachingHistory.lastDrill}.`;
@@ -574,7 +560,7 @@ export class CvAnalysisService {
         const death = timeline.deaths[i];
         const dc = deathContexts[i];
         const cd = clientDeaths[i]; // client-detected death (may not exist)
-        const round = timeline.rounds.find((r) => r.round === death.round);
+        const _round = timeline.rounds.find((r) => r.round === death.round);
         const eco = ecoTimeline.find((e) => e.round === death.round);
 
         const min = Math.floor(death.timestampSec / 60);
@@ -630,7 +616,7 @@ export class CvAnalysisService {
         if (teamLine) block += `${teamLine}\n`;
         if (abilityLine) block += `${abilityLine}\n`;
         if (obsLine) block += `${obsLine}\n`;
-        block += `Use the observation details above to coach this death.`;
+        block += 'Use the observation details above to coach this death.';
 
         dossierBlocks.push(block);
       }
@@ -715,7 +701,7 @@ These notes were pre-filtered: rounds where utility was used acceptably are NOT 
 
 Output valid JSON matching the schema.`;
 
-      const videoSchema = buildTextCoachingSchema();
+      const _videoSchema = buildTextCoachingSchema();
 
       // Architecture: Flash text-only, NO JSON schema mode.
       // JSON schema mode (responseMimeType: application/json) triggers 503 on Flash
