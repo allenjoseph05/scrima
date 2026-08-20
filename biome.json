@@ -46,7 +46,19 @@
         "packages/server/src/routes/coaching.routes.ts",
         "packages/server/src/services/cache/coaching-cache.service.ts",
         "packages/server/src/services/knowledge/game-knowledge.service.ts",
-        "packages/server/src/services/knowledge/types.ts"
+        "packages/server/src/services/knowledge/types.ts",
+        "packages/server/src/services/coaching/brain-context.service.ts",
+        "packages/server/src/services/coaching/consolidation.service.ts",
+        "packages/server/src/services/coaching/cv-analysis.service.ts",
+        "packages/server/src/services/coaching/death-context-extractor.ts",
+        "packages/server/src/services/coaching/deep-analysis.service.ts",
+        "packages/server/src/services/coaching/embedding.util.ts",
+        "packages/server/src/services/coaching/fact-verification.service.ts",
+        "packages/server/src/services/coaching/frame-analysis.service.ts",
+        "packages/server/src/services/coaching/graph.service.ts",
+        "packages/server/src/services/coaching/hypothesis-generator.service.ts",
+        "packages/server/src/services/coaching/observation.service.ts",
+        "packages/server/src/services/coaching/vlm-frame-classifier.ts"
       ],
       "linter": {
         "rules": {
