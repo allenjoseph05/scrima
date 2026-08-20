@@ -18,17 +18,13 @@
  * Accuracy: 100% on tested videos (5/5 deaths, 0 false positives)
  */
 
+import { execFile } from 'node:child_process';
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
-import { execFile } from 'node:child_process';
 import { promisify } from 'node:util';
-import { GeminiProvider, type GeminiModelId } from '../vlm/gemini.provider.js';
-import {
-  classifyFrame as onnxClassifyFrame,
-  isModelAvailable,
-  type ClassificationResult,
-} from './onnx-classifier.js';
+import type { GeminiProvider } from '../vlm/gemini.provider.js';
+import { isModelAvailable, classifyFrame as onnxClassifyFrame } from './onnx-classifier.js';
 
 const execFileAsync = promisify(execFile);
 
@@ -82,7 +78,7 @@ export interface VlmGameTimeline {
 
 // ── Classification schema (minimal, sent with every frame) ───────────────────
 
-const CLASSIFICATION_SCHEMA = {
+const _CLASSIFICATION_SCHEMA = {
   type: 'object',
   properties: {
     c: {
@@ -94,7 +90,7 @@ const CLASSIFICATION_SCHEMA = {
   required: ['c'],
 };
 
-const CLASSIFICATION_PROMPT =
+const _CLASSIFICATION_PROMPT =
   'Classify this Valorant frame as ONE of: gameplay (player alive, HUD visible, playing the game), death_screen (player just died — screen shows ELIMINATED BY text, combat report, or death animation with no player HUD), spectating (watching a teammate play after dying — SWITCH PLAYER text visible, different player HUD), buy_phase (weapon shop/buy menu open), round_end (WON/LOST/VICTORY banner visible), loading (black screen, loading screen, agent select, or alt-tabbed). Answer with just the class.';
 
 // ── Public API ───────────────────────────────────────────────────────────────
