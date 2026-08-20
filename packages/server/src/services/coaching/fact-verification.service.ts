@@ -18,27 +18,27 @@
  * Entirely graceful — if anything fails, the original data is preserved.
  */
 
-import type { GeminiProvider } from '../vlm/gemini.provider.js';
+import sharp from 'sharp';
+import { env } from '../../config/env.js';
 import {
-  VALID_WEAPONS,
+  AGENTS,
   VALID_AGENTS,
   VALID_MAPS,
-  AGENTS,
-  VALORANT_MECHANICS,
+  VALID_WEAPONS,
   VALORANT_ECONOMY,
+  VALORANT_MECHANICS,
   VALORANT_ROUND,
 } from '../../games/valorant/knowledge.js';
-import {
-  parseTimestamp,
-  buildFrameRequests,
-  extractFrames,
-  type ExtractedFrame,
-} from './frame-extractor.js';
+import { formatCoachingHistoryBlock, mapCalloutsBlock } from '../../games/valorant/prompts.js';
+import type { GeminiProvider } from '../vlm/gemini.provider.js';
 import type { ExtractedImage } from './clip-builder.js';
 import type { CoachingHistory } from './deep-analysis.service.js';
-import { formatCoachingHistoryBlock, mapCalloutsBlock } from '../../games/valorant/prompts.js';
-import { env } from '../../config/env.js';
-import sharp from 'sharp';
+import {
+  type ExtractedFrame,
+  buildFrameRequests,
+  extractFrames,
+  parseTimestamp,
+} from './frame-extractor.js';
 
 // ── Agent ID frame cropping (server-side) ────────────────────────────────────
 // Full 720p frames have tiny agent portrait / ability icons. We crop them
@@ -1049,8 +1049,8 @@ function buildFullCoachingPromptLegacy(
   // Build game mechanics block (exclude economy/round for modes that don't have them)
   const mechanicsBlock = `═══ VALORANT GAME KNOWLEDGE ═══
 ${VALORANT_MECHANICS}
-${!isDeathmatch && !isSpikeRush ? '\n' + VALORANT_ECONOMY : ''}
-${!isDeathmatch ? '\n' + VALORANT_ROUND : ''}`;
+${!isDeathmatch && !isSpikeRush ? `\n${VALORANT_ECONOMY}` : ''}
+${!isDeathmatch ? `\n${VALORANT_ROUND}` : ''}`;
 
   // Pass 2 has HIGH-RES crops — it is the authority on agent/map identification.
   // Pass 1's low-res guess is provided as a HINT only, not confirmation.
@@ -1302,9 +1302,9 @@ ${abilityContext || 'Ability state: could not be determined from frame analysis.
 ${agentBlock || ''}
 
 ${
-  abilityContext && abilityContext.includes('AVAILABLE at death')
+  abilityContext?.includes('AVAILABLE at death')
     ? '⚠️ The player had unused abilities at death. If any of those abilities could have changed the outcome (smoke for cover, flash before peek, etc.), this IS a coaching point.'
-    : abilityContext && abilityContext.includes('Already on cooldown')
+    : abilityContext?.includes('Already on cooldown')
       ? '✅ The player USED abilities before dying. Do NOT say they failed to use abilities that are on cooldown. Check if they were used effectively or wasted.'
       : 'If ability state is uncertain, do NOT criticize ability usage. Focus on positioning, movement, and decision-making.'
 }
@@ -1329,7 +1329,7 @@ This MUST be done BEFORE you write situation, mistake, or choose a category.
 
 1. CHECK crop_deathbanner — read ENEMY agent name + weapon.
 2. CHECK crop_weapon_hud — read what weapon the PLAYER was holding.
-3. CHECK crop_minimap — identify position using ${mapName !== 'unknown' ? mapName + ' callouts' : 'visible landmarks'}.
+3. CHECK crop_minimap — identify position using ${mapName !== 'unknown' ? `${mapName} callouts` : 'visible landmarks'}.
 4. WATCH the temporal sequence — understand movement, crosshair height, positioning, timing.
 5. USE the ability state above (pre-analyzed) — do NOT try to read the ability bar icons yourself.
 6. Write the ROOT CAUSE decision error, not just "bad positioning."
@@ -1574,8 +1574,8 @@ const ENRICHMENT_SCHEMA: Record<string, unknown> = {
 function buildEnrichmentPrompt(
   deathCoaching: any[],
   isHighFps = false,
-  detectedAgent?: string,
-  detectedMap?: string,
+  _detectedAgent?: string,
+  _detectedMap?: string,
 ): string {
   // Build the original coaching context per death
   const deathContext = deathCoaching
@@ -1682,7 +1682,7 @@ function groupFramesByDeath(deathFrames: FrameEntry[]): Map<number, FrameEntry[]
   for (const frame of deathFrames) {
     const match = frame.label.match(/^death_(\d+)/);
     if (!match) continue;
-    const deathNum = parseInt(match[1]);
+    const deathNum = Number.parseInt(match[1]);
     if (!groups.has(deathNum)) groups.set(deathNum, []);
     groups.get(deathNum)!.push(frame);
   }
