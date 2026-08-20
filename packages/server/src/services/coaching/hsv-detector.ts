@@ -25,10 +25,10 @@
  * Runs on CPU. Zero AI cost. ~5-15 seconds for a 40-minute game.
  */
 
+import { execFile } from 'node:child_process';
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
-import { execFile } from 'node:child_process';
 import { promisify } from 'node:util';
 
 const execFileAsync = promisify(execFile);
@@ -345,9 +345,9 @@ function analyzeRoi(
     vMax: number;
   },
 ): RoiHsvStats {
-  let sumH = 0,
-    sumS = 0,
-    sumV = 0;
+  let sumH = 0;
+  let sumS = 0;
+  let sumV = 0;
   let sumV2 = 0; // for variance
   let matchCount = 0;
   let count = 0;
@@ -355,9 +355,9 @@ function analyzeRoi(
   for (let y = roi.y1; y < roi.y2 && y < THUMB_H; y++) {
     for (let x = roi.x1; x < roi.x2 && x < THUMB_W; x++) {
       const pi = (y * THUMB_W + x) * 3;
-      const r = frame[pi],
-        g = frame[pi + 1],
-        b = frame[pi + 2];
+      const r = frame[pi];
+      const g = frame[pi + 1];
+      const b = frame[pi + 2];
       const { h, s, v } = rgbToHsv(r, g, b);
 
       sumH += h;
@@ -460,8 +460,8 @@ function analyzeAllFrames(raw: Buffer, numFrames: number): HsvFrameAnalysis[] {
     // Sharpness: low = blurred death screen background, high = sharp gameplay
     let sharpness = 0;
     {
-      let diffSum = 0,
-        cnt = 0;
+      let diffSum = 0;
+      let cnt = 0;
       for (let y = 0; y < THUMB_H; y++) {
         for (let x = 1; x < THUMB_W; x++) {
           const pi = (y * THUMB_W + x) * 3;
@@ -568,7 +568,7 @@ function computeDeathOverlayScore(
   frameSaturation: number,
   saturationDrop: number,
   centerStats: RoiHsvStats,
-  hudPresent: boolean,
+  _hudPresent: boolean,
   hudCompletelyGone: boolean,
   sharpness: number,
 ): number {
