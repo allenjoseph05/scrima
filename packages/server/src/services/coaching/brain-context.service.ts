@@ -12,19 +12,19 @@
  * Each layer is independently fault-tolerant — if one fails, the others still inject.
  */
 
-import { eq, and, desc, sql } from 'drizzle-orm';
+import { and, desc, eq, sql } from 'drizzle-orm';
 import type { Db } from '../../db/index.js';
 import { coachingGraphNodes, playerSkillMastery } from '../../db/schema.js';
-import { ObservationService } from './observation.service.js';
-import { SkillMasteryService } from './skill-mastery.service.js';
-import { GraphService } from './graph.service.js';
-import { StrategyService } from './strategy.service.js';
-import { ConsolidationService } from './consolidation.service.js';
-import { EraDetectionService } from './era-detection.service.js';
-import { HypothesisGeneratorService } from './hypothesis-generator.service.js';
-import { ProactiveCoachService } from './proactive-coach.service.js';
 import { knowledgeService } from '../../jobs/index.js';
+import { ConsolidationService } from './consolidation.service.js';
 import { embedText } from './embedding.util.js';
+import { EraDetectionService } from './era-detection.service.js';
+import { GraphService } from './graph.service.js';
+import { HypothesisGeneratorService } from './hypothesis-generator.service.js';
+import { ObservationService } from './observation.service.js';
+import { ProactiveCoachService } from './proactive-coach.service.js';
+import { SkillMasteryService } from './skill-mastery.service.js';
+import { StrategyService } from './strategy.service.js';
 
 // All Valorant agent canonical lowercase keys (matches game_knowledge entry_key).
 // Used to detect agent mentions in user questions so the brain can pivot
