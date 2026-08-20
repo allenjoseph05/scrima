@@ -369,7 +369,7 @@ export function timelineToCoachingPrompt(timeline: GameTimeline): string {
         lines.push(`    UNUSED abilities: ${d.abilitiesUnused.join(', ')}`);
       }
     } else {
-      lines.push(`  Survived round`);
+      lines.push('  Survived round');
     }
 
     // Health story
