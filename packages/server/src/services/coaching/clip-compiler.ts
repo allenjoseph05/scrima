@@ -17,16 +17,16 @@
  * temporal-aware analysis — NOT as individual frames.
  */
 
+import { execFile } from 'node:child_process';
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
-import { execFile } from 'node:child_process';
 import { promisify } from 'node:util';
 
 const execFileAsync = promisify(execFile);
 
 /** Options to hide console windows on Windows */
-const HIDDEN_OPTS = { windowsHide: true };
+const _HIDDEN_OPTS = { windowsHide: true };
 
 // ── Types ────────────────────────────────────────────────────────────────────
 
@@ -231,14 +231,14 @@ export async function compileDeathClips(
       ['-v', 'quiet', '-show_entries', 'format=duration', '-of', 'csv=p=0', outputPath],
       { windowsHide: true, timeout: 5000 },
     );
-    durationSec = Math.floor(parseFloat(out.stdout.trim()));
+    durationSec = Math.floor(Number.parseFloat(out.stdout.trim()));
   } catch {}
 
   console.log(
     '[ClipCompiler] compiled %d deaths into %ds video (%s)',
     clipMap.length,
     durationSec,
-    (fs.statSync(outputPath).size / 1024 / 1024).toFixed(1) + 'MB',
+    `${(fs.statSync(outputPath).size / 1024 / 1024).toFixed(1)}MB`,
   );
 
   return {
