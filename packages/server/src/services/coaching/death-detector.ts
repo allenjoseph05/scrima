@@ -21,10 +21,10 @@
  * and saturation drop is unmistakable.
  */
 
+import { execFile } from 'node:child_process';
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
-import { execFile } from 'node:child_process';
 import { promisify } from 'node:util';
 
 const execFileAsync = promisify(execFile);
@@ -388,17 +388,17 @@ function computeRegionStats(
   frame: Buffer,
   region: { x1: number; y1: number; x2: number; y2: number },
 ): RegionStats {
-  let sumBright = 0,
-    sumBright2 = 0,
-    sumSat = 0,
-    count = 0;
+  let sumBright = 0;
+  let sumBright2 = 0;
+  let sumSat = 0;
+  let count = 0;
 
   for (let y = region.y1; y < region.y2 && y < THUMB_H; y++) {
     for (let x = region.x1; x < region.x2 && x < THUMB_W; x++) {
       const pi = (y * THUMB_W + x) * 3;
-      const r = frame[pi],
-        g = frame[pi + 1],
-        b = frame[pi + 2];
+      const r = frame[pi];
+      const g = frame[pi + 1];
+      const b = frame[pi + 2];
       const bright = (r + g + b) / 3;
       sumBright += bright;
       sumBright2 += bright * bright;
@@ -435,20 +435,20 @@ function computeRegionVariance(
   frame: Buffer,
   region: { x1: number; y1: number; x2: number; y2: number },
 ): number {
-  let sumR = 0,
-    sumG = 0,
-    sumB = 0;
-  let sumR2 = 0,
-    sumG2 = 0,
-    sumB2 = 0;
+  let sumR = 0;
+  let sumG = 0;
+  let sumB = 0;
+  let sumR2 = 0;
+  let sumG2 = 0;
+  let sumB2 = 0;
   let count = 0;
 
   for (let y = region.y1; y < region.y2 && y < THUMB_H; y++) {
     for (let x = region.x1; x < region.x2 && x < THUMB_W; x++) {
       const pi = (y * THUMB_W + x) * 3;
-      const r = frame[pi],
-        g = frame[pi + 1],
-        b = frame[pi + 2];
+      const r = frame[pi];
+      const g = frame[pi + 1];
+      const b = frame[pi + 2];
       sumR += r;
       sumG += g;
       sumB += b;
@@ -520,22 +520,22 @@ function computeAllStats(raw: Buffer, numFrames: number): FrameStats[] {
     const offset = i * FRAME_BYTES;
     const frame = raw.subarray(offset, offset + FRAME_BYTES);
 
-    let totalR = 0,
-      totalG = 0,
-      totalB = 0,
-      totalSat = 0;
-    let centerBright = 0,
-      centerCount = 0;
-    let edgeBright = 0,
-      edgeCount = 0;
+    let totalR = 0;
+    let totalG = 0;
+    let totalB = 0;
+    let totalSat = 0;
+    let centerBright = 0;
+    let centerCount = 0;
+    let edgeBright = 0;
+    let edgeCount = 0;
     const numPixels = THUMB_W * THUMB_H;
 
     for (let y = 0; y < THUMB_H; y++) {
       for (let x = 0; x < THUMB_W; x++) {
         const pi = (y * THUMB_W + x) * 3;
-        const r = frame[pi],
-          g = frame[pi + 1],
-          b = frame[pi + 2];
+        const r = frame[pi];
+        const g = frame[pi + 1];
+        const b = frame[pi + 2];
         totalR += r;
         totalG += g;
         totalB += b;
@@ -724,7 +724,7 @@ function detectDeaths(stats: FrameStats[]): DetectedDeath[] {
       let hasDarkFrame = false;
       let allBlack = true;
       let darkestFrame = start;
-      let darkestBrightness = Infinity;
+      let darkestBrightness = Number.POSITIVE_INFINITY;
       for (let j = start; j < end; j++) {
         avgScore += deathScores[j];
         peakScore = Math.max(peakScore, deathScores[j]);
