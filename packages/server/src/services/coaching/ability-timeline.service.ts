@@ -23,16 +23,15 @@
  * 25-min game analysis.
  */
 
+import { execFile } from 'node:child_process';
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
-import { execFile } from 'node:child_process';
 import { promisify } from 'node:util';
-import sharp from 'sharp';
 import {
-  getAgentAbilityProfile,
   ABILITY_COOLDOWN_SEC,
   type AgentAbilityProfile,
+  getAgentAbilityProfile,
 } from '../../games/valorant/ability-categories.js';
 
 const execFileAsync = promisify(execFile);
