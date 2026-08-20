@@ -21,22 +21,22 @@
  *   - Refund coaching credit
  */
 
-import { eq, and, desc } from 'drizzle-orm';
+import type { GameContext } from '@scrima/shared';
+import { and, desc, eq } from 'drizzle-orm';
 import { v4 as uuidv4 } from 'uuid';
+import { env } from '../../config/env.js';
 import type { Db } from '../../db/index.js';
-import { coachingReports, coachingJobs, matches } from '../../db/schema.js';
+import { coachingJobs, coachingReports, matches } from '../../db/schema.js';
+import { VlmError } from '../../shared/errors.js';
+import type { UsageService } from '../billing/usage.service.js';
+import type { TempStorageService } from '../storage/temp-storage.service.js';
 import {
-  GeminiProvider,
   type GeminiModelId,
+  GeminiProvider,
   type UploadedFileHandle,
 } from '../vlm/gemini.provider.js';
 import { PromptBuilder } from '../vlm/prompt.builder.js';
-import { TempStorageService } from '../storage/temp-storage.service.js';
-import { UsageService } from '../billing/usage.service.js';
-import { CoachingCreditsService } from './coaching-credits.service.js';
-import { VlmError } from '../../shared/errors.js';
-import { env } from '../../config/env.js';
-import type { GameContext } from '@scrima/shared';
+import type { CoachingCreditsService } from './coaching-credits.service.js';
 
 // ── Helpers ────────────────────────────────────��────────────────────────────
 
