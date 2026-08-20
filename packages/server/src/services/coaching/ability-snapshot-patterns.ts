@@ -135,7 +135,7 @@ export function detectSnapshotPatterns(deaths: SnapshotDeath[], agentName: strin
         kind: 'ult_used_actively',
         round: -1,
         habitKey: 'ult_active',
-        text: `Ult was used at least once across the match — actively spending orb economy rather than hoarding.`,
+        text: 'Ult was used at least once across the match — actively spending orb economy rather than hoarding.',
         ratio: { numerator: ult.dimmed, denominator: ult.readable },
       });
     }
