@@ -21,10 +21,10 @@
  * of recording software, game settings, brightness, or map. No thresholds.
  */
 
+import { execFile } from 'node:child_process';
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
-import { execFile } from 'node:child_process';
 import { promisify } from 'node:util';
 import type { GeminiProvider } from '../vlm/gemini.provider.js';
 import type { DetectedDeath, DetectionResult } from './death-detector.js';
@@ -92,7 +92,7 @@ export async function extractContactSheets(
       { windowsHide: true, timeout: 15_000 },
     );
 
-    const videoDurationSec = Math.floor(parseFloat(durationStr.trim()) || 0);
+    const videoDurationSec = Math.floor(Number.parseFloat(durationStr.trim()) || 0);
     const totalFrames = Math.floor(videoDurationSec / interval);
 
     if (totalFrames < 5) {
@@ -293,7 +293,7 @@ export async function detectDeathsFromSheets(
   // Deduplicate: consecutive frames from the same death → keep the first
   const sorted = frameTimestamps.sort((a, b) => a.timestampSec - b.timestampSec);
   const deaths: DetectedDeath[] = [];
-  let lastDeathSec = -Infinity;
+  let lastDeathSec = Number.NEGATIVE_INFINITY;
 
   for (const frame of sorted) {
     if (frame.timestampSec - lastDeathSec > 10) {
