@@ -17,7 +17,7 @@
  * formatted into the prompt block by the caller.
  */
 
-import type { CastEvent, AbilityTimeline, AbilitySlot } from './ability-timeline.service.js';
+import type { AbilitySlot, AbilityTimeline } from './ability-timeline.service.js';
 
 // ── Types ───────────────────────────────────────────────────────────────────
 
@@ -45,7 +45,7 @@ const SPAM_WINDOW_SEC = 5; // ≥2 casts within this window
 const SPAM_GRACE_SEC = 10; // and no kill/death within this many seconds after
 const FIRST_CONTACT_GRACE_SEC = 15; // "early death" threshold for pre_aim_no_intel
 const ULT_HOARD_MIN_RUN = 3; // consecutive rounds with X lit at end
-const SETUP_GRIEFED_SLOT_TYPES: ('C' | 'Q' | 'E')[] = ['C', 'Q', 'E'];
+const _SETUP_GRIEFED_SLOT_TYPES: ('C' | 'Q' | 'E')[] = ['C', 'Q', 'E'];
 
 // ── Public API ──────────────────────────────────────────────────────────────
 
@@ -105,9 +105,9 @@ function detectSetupGriefed({ timeline, rounds, playerKills }: RuleInputs): Find
 
   for (const r of rounds) {
     // First contact in the round = first death OR first kill (whichever earlier).
-    const firstKill = playerKills.find((k) => k.round === r.round)?.sec ?? Infinity;
-    const firstContact = Math.min(r.deathSec ?? Infinity, firstKill);
-    if (!isFinite(firstContact) || firstContact > r.endSec) continue;
+    const firstKill = playerKills.find((k) => k.round === r.round)?.sec ?? Number.POSITIVE_INFINITY;
+    const firstContact = Math.min(r.deathSec ?? Number.POSITIVE_INFINITY, firstKill);
+    if (!Number.isFinite(firstContact) || firstContact > r.endSec) continue;
 
     // Find the bar reading nearest to first contact.
     const stillLit: AbilitySlot[] = [];
