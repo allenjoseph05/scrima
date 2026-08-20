@@ -17,7 +17,7 @@
  * things in the same match.
  */
 
-import type { CastEvent, AbilityTimeline, AbilitySlot } from './ability-timeline.service.js';
+import type { AbilityTimeline } from './ability-timeline.service.js';
 
 // ── Types ───────────────────────────────────────────────────────────────────
 
