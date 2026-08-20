@@ -13,15 +13,15 @@
  * Total per death: ~$0.0007 | Per game (10 deaths): ~$0.007
  */
 
-import { GeminiProvider, type GeminiModelId } from '../vlm/gemini.provider.js';
-import { buildFrameRequests, extractFrames, type ExtractedFrame } from './frame-extractor.js';
-import {
-  analyzeAbilityBar,
-  compareAbilityStates,
-  type AbilityBarAnalysis,
-} from './ability-analysis.js';
 import { VALID_AGENTS, VALID_WEAPONS } from '../../games/valorant/knowledge.js';
 import { logger } from '../../shared/logger.js';
+import type { GeminiModelId, GeminiProvider } from '../vlm/gemini.provider.js';
+import {
+  type AbilityBarAnalysis,
+  analyzeAbilityBar,
+  compareAbilityStates,
+} from './ability-analysis.js';
+import { type ExtractedFrame, buildFrameRequests, extractFrames } from './frame-extractor.js';
 // X1b deferred: weapon-classifier.onnx classes include "enemy" / "enemy_head"
 // alongside actual weapons, suggesting the model was trained on combined
 // deathscreen crops, not isolated weapon icons. Without a known crop region
@@ -224,7 +224,7 @@ async function processOneDeath(
   // Find frames for this death
   const deathscreen = frames.find((f) => f.label === `${prefix}_deathscreen`);
   const predeath = frames.find((f) => f.label === `${prefix}_predeath`);
-  const preFrames = ['pre_5s', 'pre_4s', 'pre_3s', 'pre_2s', 'predeath', 'moment']
+  const _preFrames = ['pre_5s', 'pre_4s', 'pre_3s', 'pre_2s', 'predeath', 'moment']
     .map((suffix) => frames.find((f) => f.label === `${prefix}_${suffix}`))
     .filter((f): f is ExtractedFrame => f != null);
   const earlyFrame = frames.find((f) => f.label === `${prefix}_pre_5s`);
@@ -275,7 +275,7 @@ async function processOneDeath(
       }));
       const resp = await vlm.verifyWithImages(
         images,
-        `Valorant gameplay frames just before a death. The first frame is 1 second before death, the second is the death moment. Observe: player positioning relative to cover, crosshair height, what the player was doing (pushing, peeking, holding), and the environment. Be specific.`,
+        'Valorant gameplay frames just before a death. The first frame is 1 second before death, the second is the death moment. Observe: player positioning relative to cover, crosshair height, what the player was doing (pushing, peeking, holding), and the environment. Be specific.',
         VISUAL_OBSERVATION_SCHEMA,
         25000,
         'gemini-2.5-flash-lite' as GeminiModelId,
