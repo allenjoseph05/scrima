@@ -16,10 +16,10 @@
  * - Returns class label + confidence score
  */
 
+import fs from 'node:fs';
+import path from 'node:path';
 import * as ort from 'onnxruntime-node';
 import sharp from 'sharp';
-import path from 'node:path';
-import fs from 'node:fs';
 
 // ── Config ───────────────────────────────────────────────────────────────────
 
