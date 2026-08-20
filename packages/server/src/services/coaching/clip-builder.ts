@@ -11,10 +11,10 @@
  * Output: A 1-3 minute focused video instead of a 10-40 minute full game.
  */
 
+import { execFile } from 'node:child_process';
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
-import { execFile } from 'node:child_process';
 import { promisify } from 'node:util';
 import type { ClipRange, KeyframeRequest } from './death-detector.js';
 
