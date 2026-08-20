@@ -37,7 +37,7 @@ interface AnalyzerConfig {
 }
 
 /** HUD region coordinates at 1280x720 (scaled for other resolutions) */
-const HUD_REGIONS_720P = {
+const _HUD_REGIONS_720P = {
   healthShield: { x: 310, y: 672, w: 200, h: 46 },
   abilityBar: { x: 430, y: 675, w: 320, h: 45 },
   credits: { x: 1130, y: 688, w: 150, h: 32 },
@@ -61,7 +61,7 @@ const HUD_REGIONS_720P = {
  * @returns Structured game timeline ready for coaching LLM
  */
 export async function analyzeVideo(
-  videoPath: string,
+  _videoPath: string,
   config: Partial<AnalyzerConfig> = {},
 ): Promise<GameTimeline> {
   const cfg: AnalyzerConfig = {
@@ -73,8 +73,8 @@ export async function analyzeVideo(
   };
 
   // Scale HUD regions for actual resolution
-  const scaleX = cfg.width / 1280;
-  const scaleY = cfg.height / 720;
+  const _scaleX = cfg.width / 1280;
+  const _scaleY = cfg.height / 720;
 
   const builder = new GameTimelineBuilder();
 
