@@ -58,7 +58,15 @@
         "packages/server/src/services/coaching/graph.service.ts",
         "packages/server/src/services/coaching/hypothesis-generator.service.ts",
         "packages/server/src/services/coaching/observation.service.ts",
-        "packages/server/src/services/coaching/vlm-frame-classifier.ts"
+        "packages/server/src/services/coaching/vlm-frame-classifier.ts",
+        "packages/server/src/services/coaching/bottleneck-compass.service.ts",
+        "packages/server/src/services/coaching/era-detection.service.ts",
+        "packages/server/src/services/coaching/era-summary.service.ts",
+        "packages/server/src/services/coaching/pre-session-briefing.service.ts",
+        "packages/server/src/services/coaching/proactive-coach.service.ts",
+        "packages/server/src/services/coaching/skill-mastery.service.ts",
+        "packages/server/src/services/coaching/strategy.service.ts",
+        "packages/server/src/services/coaching/weekly-report.service.ts"
       ],
       "linter": {
         "rules": {
