@@ -1,0 +1,84 @@
+{
+  "$schema": "https://schema.tauri.app/config/2",
+  "productName": "Scrima",
+  "version": "0.1.0",
+  "identifier": "gg.scrima.app",
+  "build": {
+    "beforeDevCommand": "pnpm vite:dev",
+    "devUrl": "http://localhost:1420",
+    "beforeBuildCommand": "pnpm vite:build",
+    "frontendDist": "../dist"
+  },
+  "app": {
+    "windows": [
+      {
+        "label": "main",
+        "title": "Scrima",
+        "width": 1280,
+        "height": 800,
+        "minWidth": 960,
+        "minHeight": 600,
+        "resizable": true,
+        "fullscreen": false,
+        "decorations": true,
+        "transparent": false
+      }
+    ],
+    "security": {
+      "csp": "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' asset: https:; connect-src 'self' https://*.scrima.gg https://api.scrima.gg",
+      "assetProtocol": {
+        "enable": true,
+        "scope": [
+          "$APPLOCALDATA/../Scrima/**",
+          "$APPLOCALDATA/../gg.scrima.app/**",
+          "$RESOURCE/**",
+          "$HOME/AppData/Local/Scrima/**"
+        ]
+      }
+    },
+    "trayIcon": {
+      "iconPath": "icons/32x32.png",
+      "iconAsTemplate": true,
+      "menuOnLeftClick": false,
+      "title": "Scrima",
+      "tooltip": "Scrima — AI Gaming Coach"
+    }
+  },
+  "bundle": {
+    "active": true,
+    "targets": "all",
+    "publisher": "Scrima",
+    "copyright": "© 2026 Scrima",
+    "category": "Game",
+    "icon": [
+      "icons/32x32.png",
+      "icons/128x128.png",
+      "icons/128x128@2x.png",
+      "icons/icon.icns",
+      "icons/icon.ico"
+    ],
+    "resources": [],
+    "windows": {
+      "certificateThumbprint": "",
+      "digestAlgorithm": "sha256",
+      "wix": {
+        "language": "en-US"
+      },
+      "nsis": {
+        "installMode": "currentUser",
+        "languages": ["English"],
+        "displayLanguageSelector": false
+      }
+    }
+  },
+  "plugins": {
+    "updater": {
+      "pubkey": "",
+      "endpoints": ["https://github.com/scrima-gg/scrima/releases/latest/download/latest.json"],
+      "dialog": false,
+      "windows": {
+        "installMode": "passive"
+      }
+    }
+  }
+}
