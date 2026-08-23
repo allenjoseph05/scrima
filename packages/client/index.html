@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/png" href="/scrima-logo.png" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Scrima — AI Gaming Coach</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet" />
+  </head>
+  <body>
+    <div id="root">
+      <!-- Inline fallback — shown before Vite/React loads, or if the dev server is down.
+           React will replace this div's contents once it mounts. -->
+      <div id="scrima-loader" style="
+        display: flex; flex-direction: column; align-items: center; justify-content: center;
+        height: 100vh; background: #0a0a0f; color: #e2e2e8; font-family: 'Inter', system-ui, sans-serif;
+        margin: 0; padding: 0;
+      ">
+        <img src="/scrima-logo.png" alt="Scrima" width="64" height="64" style="margin-bottom: 24px; opacity: 0.9;" onerror="this.style.display='none'" />
+        <div style="font-size: 20px; font-weight: 600; margin-bottom: 8px;">Scrima</div>
+        <div id="loader-status" style="font-size: 13px; color: #888; margin-bottom: 24px;">Loading...</div>
+        <div style="width: 120px; height: 3px; background: #1a1a2e; border-radius: 2px; overflow: hidden;">
+          <div style="width: 40%; height: 100%; background: linear-gradient(90deg, #6366f1, #818cf8); border-radius: 2px; animation: loader-slide 1.2s ease-in-out infinite;"></div>
+        </div>
+        <style>
+          @keyframes loader-slide { 0% { transform: translateX(-100%); } 100% { transform: translateX(300%); } }
+          body { margin: 0; background: #0a0a0f; }
+        </style>
+        <script>
+          // Dev-only: auto-reload if React fails to mount
+          if (window.location.hostname === 'localhost') {
+            setTimeout(function() {
+              var root = document.getElementById('root');
+              if (root && document.getElementById('scrima-loader')) {
+                var status = document.getElementById('loader-status');
+                if (status) {
+                  status.textContent = 'Waiting for frontend server... Retrying.';
+                  status.style.color = '#f59e0b';
+                }
+                // Auto-retry every 3 seconds
+                setInterval(function() { location.reload(); }, 3000);
+              }
+            }, 8000);
+          }
+        </script>
+      </div>
+    </div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>
