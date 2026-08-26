@@ -1,0 +1,585 @@
+/* GAMING REDESIGN */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ── CSS Custom Properties ─────────────────────────────────────────────────── */
+:root {
+  --bg: #050810;
+  --surface: #0a0e1a;
+  --card: #0d1221;
+  --elevated: #121929;
+  --border: #1a2440;
+  --border-bright: #2d4a6b;
+  --purple: #7c3aed;
+  --purple-glow: #a78bfa;
+  --purple-dim: #4c1d95;
+  --cyan: #00d4ff;
+  --cyan-dim: #0e4966;
+  --red: #ff2d55;
+  --green: #00ff85;
+  --orange: #f59e0b;
+  --text-primary: #e8efff;
+  --text-secondary: #7a8bad;
+  --text-muted: #3d4f6e;
+}
+
+/* ── Keyframes ─────────────────────────────────────────────────────────────── */
+@keyframes glow-pulse {
+  0%,
+  100% {
+    opacity: 1;
+    box-shadow: 0 0 8px var(--purple), 0 0 16px var(--purple-dim);
+  }
+  50% {
+    opacity: 0.65;
+    box-shadow: 0 0 20px var(--purple), 0 0 40px var(--purple), 0 0 60px #7c3aed44;
+  }
+}
+
+@keyframes scan {
+  0% {
+    transform: translateY(-100%);
+    opacity: 0.6;
+  }
+  50% {
+    opacity: 0.3;
+  }
+  100% {
+    transform: translateY(100vh);
+    opacity: 0;
+  }
+}
+
+@keyframes flicker {
+  0%,
+  94%,
+  100% {
+    filter: brightness(1);
+  }
+  95% {
+    filter: brightness(0.82);
+  }
+  96% {
+    filter: brightness(1.08);
+  }
+  97% {
+    filter: brightness(0.88);
+  }
+  98% {
+    filter: brightness(1.03);
+  }
+  99% {
+    filter: brightness(0.95);
+  }
+}
+
+@keyframes pulse-dot {
+  0%,
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.4;
+    transform: scale(0.75);
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+@keyframes border-flow {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+@keyframes float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-6px);
+  }
+}
+
+@keyframes rotate-slow {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes dash-offset {
+  to {
+    stroke-dashoffset: -20;
+  }
+}
+
+@keyframes fade-in-up {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes typewriter-cursor {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0;
+  }
+}
+
+/* ── Base Reset ────────────────────────────────────────────────────────────── */
+@layer base {
+  * {
+    box-sizing: border-box;
+  }
+
+  html,
+  body {
+    background-color: var(--bg);
+    color: var(--text-primary);
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    width: 100%;
+    overflow: hidden;
+    font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  #root {
+    height: 100%;
+    width: 100%;
+  }
+
+  /* Custom scrollbar — purple thumb */
+  ::-webkit-scrollbar {
+    width: 5px;
+    height: 5px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: var(--surface);
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: var(--purple-dim);
+    border-radius: 2px;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: var(--purple);
+  }
+}
+
+/* ── Utility Classes ───────────────────────────────────────────────────────── */
+@layer components {
+  /* Neon purple border glow */
+  .neon-border {
+    border: 1px solid var(--purple);
+    box-shadow: 0 0 8px var(--purple), inset 0 0 8px #7c3aed18;
+  }
+
+  /* Gaming card */
+  .card-gaming {
+    background-color: var(--card);
+    border: 1px solid var(--border);
+    position: relative;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  }
+
+  .card-gaming::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: transparent;
+    transition: background 0.2s ease;
+  }
+
+  .card-gaming:hover {
+    border-color: var(--purple-dim);
+    box-shadow: 0 0 16px #7c3aed22;
+  }
+
+  .card-gaming:hover::before {
+    background: linear-gradient(90deg, transparent, var(--purple), transparent);
+  }
+
+  /* Large monospace stat value */
+  .stat-value {
+    font-family: "JetBrains Mono", "Fira Code", Consolas, monospace;
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--cyan);
+    line-height: 1;
+    letter-spacing: -0.02em;
+  }
+
+  /* Primary button — purple, no radius, uppercase */
+  .btn-primary {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1.25rem;
+    background-color: var(--purple);
+    color: #fff;
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    border: none;
+    border-radius: 2px;
+    cursor: pointer;
+    transition: background-color 0.15s ease, box-shadow 0.15s ease;
+  }
+
+  .btn-primary:hover:not(:disabled) {
+    background-color: var(--purple-glow);
+    box-shadow: 0 0 16px var(--purple), 0 0 32px #7c3aed44;
+  }
+
+  .btn-primary:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+  }
+
+  /* Ghost button — transparent, purple border */
+  .btn-ghost {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1.25rem;
+    background-color: transparent;
+    color: var(--purple-glow);
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    border: 1px solid var(--purple);
+    border-radius: 2px;
+    cursor: pointer;
+    transition: background-color 0.15s ease, box-shadow 0.15s ease, color 0.15s ease;
+  }
+
+  .btn-ghost:hover:not(:disabled) {
+    background-color: #7c3aed18;
+    box-shadow: 0 0 12px #7c3aed44;
+    color: #fff;
+  }
+
+  .btn-ghost:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+  }
+
+  /* Pulsing live dot */
+  .live-dot {
+    display: inline-block;
+    width: 0.5rem;
+    height: 0.5rem;
+    border-radius: 50%;
+    animation: pulse-dot 1.4s ease-in-out infinite;
+  }
+
+  /* Circuit / grid background pattern */
+  .bg-grid {
+    background-image: repeating-linear-gradient(
+        0deg,
+        transparent,
+        transparent 39px,
+        #1a244018 39px,
+        #1a244018 40px
+      ),
+      repeating-linear-gradient(
+        90deg,
+        transparent,
+        transparent 39px,
+        #1a244018 39px,
+        #1a244018 40px
+      );
+  }
+
+  /* Diagonal clip hero element */
+  .clip-hero {
+    clip-path: polygon(0 0, 100% 0, 100% calc(100% - 16px), calc(100% - 16px) 100%, 0 100%);
+  }
+
+  /* Left accent bar for active sidebar items */
+  .sidebar-active {
+    position: relative;
+    background: linear-gradient(90deg, #7c3aed14 0%, transparent 100%);
+    color: var(--purple-glow);
+  }
+
+  .sidebar-active::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background: var(--purple);
+    box-shadow: 0 0 12px var(--purple), 0 0 24px var(--purple-dim);
+    border-radius: 0 1px 1px 0;
+  }
+
+  /* ── HUD Corner Brackets ──────────────────────────────────────────────────── */
+  .hud-corners {
+    position: relative;
+  }
+
+  .hud-corners::before,
+  .hud-corners::after {
+    content: "";
+    position: absolute;
+    width: 12px;
+    height: 12px;
+    pointer-events: none;
+    z-index: 1;
+  }
+
+  .hud-corners::before {
+    top: -1px;
+    left: -1px;
+    border-top: 2px solid var(--purple);
+    border-left: 2px solid var(--purple);
+  }
+
+  .hud-corners::after {
+    bottom: -1px;
+    right: -1px;
+    border-bottom: 2px solid var(--purple);
+    border-right: 2px solid var(--purple);
+  }
+
+  /* Additional corners via inner span */
+  .hud-corners-full::before,
+  .hud-corners-full::after {
+    content: "";
+    position: absolute;
+    width: 12px;
+    height: 12px;
+    pointer-events: none;
+    z-index: 1;
+  }
+
+  .hud-corners-full::before {
+    top: -1px;
+    right: -1px;
+    border-top: 2px solid var(--purple-dim);
+    border-right: 2px solid var(--purple-dim);
+  }
+
+  .hud-corners-full::after {
+    bottom: -1px;
+    left: -1px;
+    border-bottom: 2px solid var(--purple-dim);
+    border-left: 2px solid var(--purple-dim);
+  }
+
+  /* ── Animated border card ────────────────────────────────────────────────── */
+  .card-hud {
+    background-color: var(--card);
+    border: 1px solid var(--border);
+    position: relative;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+  }
+
+  .card-hud:hover {
+    border-color: var(--purple);
+    box-shadow: 0 0 20px #7c3aed18, inset 0 0 20px #7c3aed08;
+  }
+
+  .card-hud::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--purple-dim), transparent);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+  }
+
+  .card-hud:hover::before {
+    opacity: 1;
+  }
+
+  /* ── Shimmer text effect ──────────────────────────────────────────────────── */
+  .text-shimmer {
+    background: linear-gradient(
+      90deg,
+      var(--purple-glow) 0%,
+      #e8efff 25%,
+      var(--purple-glow) 50%,
+      #e8efff 75%,
+      var(--purple-glow) 100%
+    );
+    background-size: 200% 100%;
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    animation: shimmer 4s linear infinite;
+  }
+
+  /* ── Gradient divider ────────────────────────────────────────────────────── */
+  .divider-glow {
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--purple), var(--cyan), transparent);
+    opacity: 0.4;
+  }
+
+  /* ── Glass panel ─────────────────────────────────────────────────────────── */
+  .glass-panel {
+    background: linear-gradient(135deg, #0d122180, #12192940);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    border: 1px solid #1a244060;
+  }
+
+  /* ── Scan line overlay (for sidebar) ──────────────────────────────────────── */
+  .scan-lines {
+    position: relative;
+  }
+
+  .scan-lines::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 2px,
+      #0a0e1a08 2px,
+      #0a0e1a08 4px
+    );
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* ── Animated dot grid (replaces static grid for main content) ────────── */
+  .bg-dots {
+    background-image: radial-gradient(circle, #1a244025 1px, transparent 1px);
+    background-size: 24px 24px;
+  }
+
+  /* ── Fade-in animation utility ───────────────────────────────────────────── */
+  .fade-in-up {
+    animation: fade-in-up 0.4s ease-out both;
+  }
+
+  .fade-in-up-delay-1 {
+    animation-delay: 0.08s;
+  }
+  .fade-in-up-delay-2 {
+    animation-delay: 0.16s;
+  }
+  .fade-in-up-delay-3 {
+    animation-delay: 0.24s;
+  }
+  .fade-in-up-delay-4 {
+    animation-delay: 0.32s;
+  }
+
+  /* ── Coach Q&A markdown ──────────────────────────────────────────────────── */
+  .prose-coach p {
+    margin: 0 0 0.5em;
+    line-height: 1.6;
+  }
+
+  .prose-coach p:last-child {
+    margin-bottom: 0;
+  }
+
+  .prose-coach strong {
+    color: #e8efff;
+    font-weight: 700;
+  }
+
+  .prose-coach em {
+    color: #a78bfa;
+    font-style: italic;
+  }
+
+  .prose-coach ul,
+  .prose-coach ol {
+    margin: 0.4em 0;
+    padding-left: 1.2em;
+  }
+
+  .prose-coach li {
+    margin-bottom: 0.25em;
+  }
+
+  .prose-coach li::marker {
+    color: #3d4f6e;
+  }
+
+  .prose-coach h1,
+  .prose-coach h2,
+  .prose-coach h3,
+  .prose-coach h4,
+  .prose-coach h5,
+  .prose-coach h6 {
+    color: #e8efff;
+    font-weight: 700;
+    margin: 0.6em 0 0.3em;
+    font-size: inherit;
+  }
+
+  .prose-coach code {
+    color: #00d4ff;
+    background: #0d1221;
+    padding: 0.1em 0.35em;
+    font-size: 0.9em;
+    font-family: "JetBrains Mono", monospace;
+  }
+
+  .prose-coach blockquote {
+    margin: 0.5em 0;
+    padding: 0.4em 0.8em;
+    border-left: 2px solid #7c3aed44;
+    color: #7a8bad;
+  }
+
+  .prose-coach hr {
+    border: none;
+    border-top: 1px solid #1a2440;
+    margin: 0.6em 0;
+  }
+}
