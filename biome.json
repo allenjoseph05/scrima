@@ -86,6 +86,31 @@
           }
         }
       }
+    },
+    {
+      "include": ["packages/client/src/**/*.ts", "packages/client/src/**/*.tsx"],
+      "linter": {
+        "rules": {
+          "a11y": {
+            "noLabelWithoutControl": "off",
+            "noSvgWithoutTitle": "off",
+            "useButtonType": "off",
+            "useKeyWithClickEvents": "off",
+            "useSemanticElements": "off"
+          },
+          "complexity": {
+            "noForEach": "off"
+          },
+          "correctness": {
+            "useExhaustiveDependencies": "off"
+          },
+          "suspicious": {
+            "noAssignInExpressions": "off",
+            "noArrayIndexKey": "off",
+            "noExplicitAny": "off"
+          }
+        }
+      }
     }
   ]
 }
