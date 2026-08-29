@@ -1,0 +1,84 @@
+# Build and release Scrima desktop app
+# Triggers on version tags: v0.1.0, v1.0.0-beta, etc.
+#
+# Required GitHub secrets:
+#   TAURI_SIGNING_PRIVATE_KEY  — Tauri updater signing key (generate with: pnpm tauri signer generate)
+#   TAURI_SIGNING_PRIVATE_KEY_PASSWORD — Password for the signing key (can be empty string)
+#
+# Optional secrets for Windows code signing:
+#   WINDOWS_CERTIFICATE — Base64-encoded .pfx certificate
+#   WINDOWS_CERTIFICATE_PASSWORD — Certificate password
+
+name: Release Desktop App
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Release tag (e.g. v0.1.0)'
+        required: true
+
+jobs:
+  build:
+    name: Build Windows
+    runs-on: windows-latest
+
+    permissions:
+      contents: write
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10
+
+      - name: Install Rust stable
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Rust cache
+        uses: swatinem/rust-cache@v2
+        with:
+          workspaces: packages/client/src-tauri -> target
+
+      - name: Install frontend dependencies
+        run: pnpm install --frozen-lockfile
+
+      # Import Windows code signing certificate (if provided)
+      - name: Import code signing certificate
+        if: ${{ secrets.WINDOWS_CERTIFICATE != '' }}
+        env:
+          WINDOWS_CERTIFICATE: ${{ secrets.WINDOWS_CERTIFICATE }}
+          WINDOWS_CERTIFICATE_PASSWORD: ${{ secrets.WINDOWS_CERTIFICATE_PASSWORD }}
+        run: |
+          $certBytes = [Convert]::FromBase64String($env:WINDOWS_CERTIFICATE)
+          $certPath = Join-Path $env:RUNNER_TEMP "certificate.pfx"
+          [IO.File]::WriteAllBytes($certPath, $certBytes)
+          Import-PfxCertificate -FilePath $certPath -CertStoreLocation Cert:\CurrentUser\My -Password (ConvertTo-SecureString -String $env:WINDOWS_CERTIFICATE_PASSWORD -AsPlainText -Force)
+        shell: powershell
+
+      - name: Build Tauri app
+        uses: tauri-apps/tauri-action@v0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
+          TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
+        with:
+          tagName: ${{ github.event.inputs.tag || github.ref_name }}
+          releaseName: 'Scrima ${{ github.event.inputs.tag || github.ref_name }}'
+          releaseBody: |
+            Scrima desktop release artifacts for Windows.
+          releaseDraft: true
+          prerelease: false
+          projectPath: packages/client
+          tauriScript: pnpm tauri

@@ -8,9 +8,14 @@ packages/web
 packages/server/node_modules
 packages/shared/node_modules
 packages/server/dist
+packages/server/data/
+packages/server/*.mp4*
+packages/server/src/services/coaching/models/*.onnx
 packages/shared/dist
 packages/server/.env
 packages/server/.env.*
+docs/
+ml-training/
 **/*.test.ts
 **/*.spec.ts
 **/vitest.config.ts

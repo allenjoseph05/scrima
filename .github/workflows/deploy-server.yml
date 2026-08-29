@@ -1,0 +1,45 @@
+# Deploy Scrima API server to Fly.io
+# Triggers on push to main when server or shared packages change.
+# Requires FLY_API_TOKEN secret in GitHub repo settings.
+
+name: Deploy Server
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'packages/server/**'
+      - 'packages/shared/**'
+      - 'Dockerfile'
+      - 'fly.toml'
+      - 'pnpm-lock.yaml'
+
+  workflow_dispatch: # Manual trigger
+
+jobs:
+  deploy:
+    name: Deploy to Fly.io
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Type check
+        run: pnpm --filter @scrima/server exec tsc --noEmit
+
+      - uses: superfly/flyctl-actions/setup-flyctl@master
+
+      - name: Deploy to Fly.io
+        run: flyctl deploy --remote-only
+        env:
+          FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}

@@ -1,0 +1,33 @@
+name: CI
+
+on:
+  pull_request:
+    branches: [main]
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Lint changed files
+        run: pnpm exec biome ci --changed --since=${{ github.event.pull_request.base.sha }} --no-errors-on-unmatched
+
+      - name: Type check
+        run: pnpm exec turbo run typecheck
+
+      - name: Test
+        run: pnpm run test
